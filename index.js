@@ -28,8 +28,8 @@ const client = new MongoClient(uri, {
 });
 
 //token validation
-const verifyJWT = (req, res, next) => {
-  const authorization = req.headers.authorization;
+const verifyJWT = async (req, res, next) => {
+  const authorization = await req.headers.authorization;
   if (!authorization) {
     res.send({ error: true, message: "Unauthorized user" });
   }
@@ -46,7 +46,7 @@ const verifyJWT = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    client.connect();
+    await client.connect();
 
     const serviceCollection = client.db("carDoctor").collection("services");
     const bookingCollection = client.db("carDoctor").collection("bookings");
@@ -79,7 +79,7 @@ async function run() {
 
     app.get("/bookings", verifyJWT, async (req, res) => {
       const decoded = req.decoded;
-      if (decoded?.user?.email !== req.query?.email) {
+      if (decoded.email !== req.query?.email) {
         return res
           .status(403)
           .send({ error: true, message: "forbidden access" });
